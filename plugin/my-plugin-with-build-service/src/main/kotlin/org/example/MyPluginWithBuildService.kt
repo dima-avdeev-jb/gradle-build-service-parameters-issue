@@ -1,8 +1,3 @@
-/*
- * Copyright 2020-2023 JetBrains s.r.o. and respective authors and developers.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
- */
-
 package org.example
 
 import org.gradle.api.Plugin
@@ -15,24 +10,26 @@ import org.gradle.tooling.events.FinishEvent
 import org.gradle.tooling.events.OperationCompletionListener
 import javax.inject.Inject
 
-
 @Suppress("unused")
 abstract class MyPluginWithBuildService : Plugin<Project> {
     @Inject
     abstract fun getEventsListenerRegistry(): BuildEventsListenerRegistry
 
     override fun apply(project: Project) {
+        println("Hello MyPluginWithBuildService")
+
         val myServiceProvider = project.gradle.sharedServices.registerIfAbsent(
             "myService",
             MyService::class.java
         ) {
-            //todo workaround
-//            it.parameters.someInt
+            if (System.getenv("USE_WORKAROUND") == "true") {
+                // workaround is simple to access property at least once
+                it.parameters.someInt
+            }
         }
         getEventsListenerRegistry().onTaskCompletion(myServiceProvider)
     }
 }
-
 
 abstract class MyService : BuildService<MyParameters>, OperationCompletionListener {
     override fun onFinish(event: FinishEvent?) {
@@ -40,6 +37,6 @@ abstract class MyService : BuildService<MyParameters>, OperationCompletionListen
     }
 }
 
-interface MyParameters: BuildServiceParameters {
+interface MyParameters : BuildServiceParameters {
     val someInt: Property<Int>
 }

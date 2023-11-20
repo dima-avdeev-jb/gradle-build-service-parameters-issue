@@ -4,6 +4,11 @@ plugins {
     id("maven-publish")
 }
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
 group = "org.example"
 version = "1.0.0"
 
